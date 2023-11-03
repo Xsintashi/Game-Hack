@@ -28,7 +28,7 @@ public:
 			if (IsDebuggerPresent()) {
 				// Debugger is present closing game in a few seconds
 				THREAD_SLEEP((static_cast<DWORD>(data.globalVars->tickCount * 100) % 15) * 1000);
-				data.localPlayer->trusted = false;
+				data.localPlayer->behavior->trusted= false;
 				isRunning = false;
 			}
 #endif
