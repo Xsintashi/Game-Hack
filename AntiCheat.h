@@ -15,7 +15,23 @@ class GlobalVars;
 // Ghetto Anticheat LOL
 class AntiCheat {
 public:
+
+	bool overSleep() noexcept {
+		while (isRunning || turned) {
+			static auto buffTick = GetTickCount64();
+			THREAD_SLEEP(1000);
+			if (GetTickCount64() - buffTick > 1500) { // Slept a lil too much
+				data.localPlayer->behavior->trusted = false;
+				isRunning = false;
+				return true;
+			}
+			buffTick = GetTickCount64();
+		}
+		return false;
+	}
+
 	void thread() noexcept {
+
 		while (isRunning || turned) {
 			THREAD_SLEEP(128);
 			Lock lock;
@@ -27,6 +43,7 @@ public:
 #if !defined(_DEBUG)
 			if (IsDebuggerPresent()) {
 				// Debugger is present closing game in a few seconds
+				data.localPlayer->behavior->level = 1;
 				THREAD_SLEEP((static_cast<DWORD>(data.globalVars->tickCount * 100) % 15) * 1000);
 				data.localPlayer->behavior->trusted= false;
 				isRunning = false;
@@ -42,16 +59,6 @@ public:
 				data.localPlayer->behavior->trusted = false;
 				isRunning = false;
 			}
-		}
-	}
-
-	bool overSleep() noexcept {
-		while (isRunning || turned) {
-			THREAD_SLEEP(1000);
-			static auto buffTick = GetTickCount64();
-			if (GetTickCount64() - buffTick > 1500) // Slept a lil too much
-				return true;
-			return false;
 		}
 	}
 

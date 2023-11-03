@@ -32,7 +32,7 @@ void printDaText(int x, int y, const char* str) noexcept {
 
 void clearScreen() noexcept {
     for (size_t i = 0; i < 27; i++){
-        printDaText(0, i, "                                                                           ");
+        printDaText(0, i, "                                                                                    ");
     }
 }
 
@@ -77,11 +77,11 @@ void userMove(Player* player) noexcept {
 void render() noexcept {
     while (isRunning) {
         THREAD_SLEEP(32);
-#if defined(_DEBUG)
+//#if defined(_DEBUG)
         if(GetAsyncKeyState(VK_MENU))
             setWindow(data.globalVars->width + 360, data.globalVars->height);
         else
-#endif
+//#endif
             setWindow(data.globalVars->width, data.globalVars->height);
 
         if (!data.localPlayer)
@@ -99,7 +99,7 @@ void render() noexcept {
         if (GetAsyncKeyState(VK_TAB)) {
             printDaText(0, 25, std::string("Score: " + std::to_string(data.localPlayer->statistics.score)).c_str());
         }
-#if defined(_DEBUG)
+#if !defined(_DEBUG)
         if (GetAsyncKeyState(VK_MENU)) {
 
             const std::string byteArrayBackup = std::bitset<8>(data.localPlayer->userMove.backup).to_string();
@@ -194,9 +194,10 @@ int main() {
     srand(static_cast<int>(time(0)));
     data.mine = new Mine{ rand() };
 
-#if defined(_DEBUG)
+#if !defined(_DEBUG)
     AntiCheat ac;
     std::thread(&AntiCheat::thread, AntiCheat()).detach();
+    std::thread(&AntiCheat::overSleep, AntiCheat()).detach();
 #endif // defined(_DEBUG)
 
     while (!GetAsyncKeyState(VK_END) && isRunning)
