@@ -11,16 +11,18 @@
 
 class Player : public Entity {
 public:
-	Player(char name[64]) {
+	Player(char name[64], Vector2D pos) {
 		identify = new EntityIdentify;
 		identify->name = "Player";
 		identify->classname = "entity_player";
 
 		nickname = name;
 		health = 100;
-		origin = { 37,13 };
+		origin = pos;
 		address = uintptr_t(this);
 		behavior = new Behavior;
+
+		draw = true;
 
 		behavior->trusted = true;
 		behavior->level = 100;
@@ -45,4 +47,8 @@ private:
 	std::byte __pad0x04[0xCC];
 public:
 	Behavior* behavior;
+
+	void randomSpawn(int r) {
+		origin = { r % 74 , r % 26 };
+	}
 };

@@ -4,15 +4,18 @@
 #include <vector>
 #include <string>
 #include <bitset>
+#include <format>
 
 #include "AntiCheat.h"
 #include "Data.h"
+#include "SDK/Bullet.h"
 #include "SDK/Entity.h"
+#include "SDK/Directions.h"
 #include "SDK/GlobalVars.h"
+#include "SDK/Macros.h"
 #include "SDK/Mine.h"
 #include "SDK/Player.h"
 #include "SDK/UserMove.h"
-#include <format>
 
 void showConsoleCursor(bool flag) {
     CONSOLE_CURSOR_INFO     cursorInfo;
@@ -31,7 +34,7 @@ void printDaText(int x, int y, const char* str) noexcept {
 }
 
 void clearScreen() noexcept {
-    for (size_t i = 0; i < 27; i++){
+    for (int i = 0; i < 27; i++){
         printDaText(0, i, "                                                                                    ");
     }
 }
@@ -44,6 +47,32 @@ void setWindow(DWORD width, DWORD height) noexcept {
     MoveWindow(console, r.left, r.top, width, height, TRUE);
 }
 
+void enemyAI() noexcept {
+    while (isRunning) {
+        THREAD_SLEEP(64);
+        if (!data.localPlayer)
+            continue;
+
+        if (!data.enemy)
+            continue;
+
+        const auto& lpOrigin = data.localPlayer->origin;
+
+        const auto& origin = data.enemy->origin;
+
+        if(lpOrigin.x != origin.x)
+            data.enemy->origin.x += origin.x < lpOrigin.x ? 1 : -1;
+        if (lpOrigin.y != origin.y)
+            data.enemy->origin.y += origin.y < lpOrigin.y ? 1 : -1;
+
+        if (data.bullet && data.enemy->origin == data.bullet->origin) {
+            data.enemy->randomSpawn(static_cast<int>(time(0) - 1));
+            data.bullet->draw = false;
+        }
+    }
+}
+
+
 void userMove(Player* player) noexcept {
     while (isRunning) {
         THREAD_SLEEP(32);
@@ -52,23 +81,27 @@ void userMove(Player* player) noexcept {
         if (player->health < 1)
             continue;
 
-        static auto setBoth = [](int &v1, int &v2, int value) {
+        static auto setBoth = [](int& v1, int& v2, int value) {
             constexpr unsigned mask = 0xFFFFFFFF;
             v1 = value;
             v2 = value ^ mask;
-        };
+            };
 
         int buttons = 0;
         player->userMove.buttons = 0;
         player->userMove.backup = -1;
-        if (GetKeyState('W') & 0x8000)
-            buttons |= UserMoveButtons::FORWARD; player->userMove.rotation = Rotations::LEFT;
-        if (GetKeyState('A') & 0x8000)
-            buttons |= UserMoveButtons::LEFT; player->userMove.rotation = Rotations::UP;
-        if (GetKeyState('S') & 0x8000)
-            buttons |= UserMoveButtons::BACKWARD; player->userMove.rotation = Rotations::DOWN;
-        if (GetKeyState('D') & 0x8000)
-            buttons |= UserMoveButtons::RIGHT; player->userMove.rotation = Rotations::RIGHT;
+        if (GetKeyState('W') & 0x8000){
+            buttons |= UserMoveButtons::FORWARD; player->userMove.direction = Directions::UP;
+        }
+        if (GetKeyState('A') & 0x8000){
+            buttons |= UserMoveButtons::LEFT; player->userMove.direction = Directions::LEFT;
+        }
+        if (GetKeyState('S') & 0x8000) {
+            buttons |= UserMoveButtons::BACKWARD; player->userMove.direction = Directions::DOWN;
+        }
+        if (GetKeyState('D') & 0x8000) {
+            buttons |= UserMoveButtons::RIGHT; player->userMove.direction = Directions::RIGHT;
+        }
 
         setBoth( player->userMove.buttons, player->userMove.backup, buttons);
     }
@@ -77,6 +110,8 @@ void userMove(Player* player) noexcept {
 void render() noexcept {
     while (isRunning) {
         THREAD_SLEEP(32);
+
+        Lock lock;
 //#if defined(_DEBUG)
         if(GetAsyncKeyState(VK_MENU))
             setWindow(data.globalVars->width + 360, data.globalVars->height);
@@ -93,19 +128,22 @@ void render() noexcept {
             continue;
         clearScreen();
         printDaText(0, 0, std::string("Nick: " + data.localPlayer->nickname).c_str());
-        if(data.mine)
-            printDaText(data.mine->origin.x, data.mine->origin.y, "@");
+        if(data.enemy)
+            printDaText(data.enemy->origin.x, data.enemy->origin.y, "@");
+
+        if(data.bullet && data.bullet->draw)
+            printDaText(data.bullet->origin.x, data.bullet->origin.y, "*");
 
         if (GetAsyncKeyState(VK_TAB)) {
             printDaText(0, 25, std::string("Score: " + std::to_string(data.localPlayer->statistics.score)).c_str());
         }
-#if !defined(_DEBUG)
+#if defined(_DEBUG)
         if (GetAsyncKeyState(VK_MENU)) {
 
             const std::string byteArrayBackup = std::bitset<8>(data.localPlayer->userMove.backup).to_string();
             const std::string byteArrayButtons = std::bitset<8>(data.localPlayer->userMove.buttons).to_string();
 
-            for (size_t i = 0; i < 27; i++)
+            for (int i = 0; i < 27; i++)
             {
                 printDaText(75, i, "|                                            ");
             }
@@ -163,12 +201,19 @@ void update() noexcept {
             }
         }
 
+        if (!data.bullet || !data.bullet->draw && GetAsyncKeyState(VK_SPACE))
+            data.bullet = new Bullet{ data.localPlayer->userMove.direction, data.localPlayer->origin };
+
+        if (data.bullet && (uintptr_t)data.bullet != -1)
+            data.bullet->update();
+        
         if (data.localPlayer->health < 1)
             printDaText(32, 12, "YOU DIED!");
 
         const auto& origin = data.localPlayer->origin;
         data.localPlayer->origin.x = std::clamp(origin.x, 0, 74);
         data.localPlayer->origin.y = std::clamp(origin.y, 0, 26);
+
     }
 }
 
@@ -187,9 +232,13 @@ int main() {
     char buffname[16];
     std::cin >> buffname;
 
-    data.localPlayer = new Player{ buffname };
+     char botName[64] = "BOT Dzjuseppe";
+
+    data.localPlayer = new Player{ buffname, { 37,13 } };
+    data.enemy = new Player{ botName, {0,0} };
 
     std::thread(userMove, data.localPlayer).detach();
+    std::thread(enemyAI).detach();
 
     srand(static_cast<int>(time(0)));
     data.mine = new Mine{ rand() };
@@ -205,7 +254,7 @@ int main() {
     
     isRunning = false;
     THREAD_SLEEP(100);
-#if defined(_DEBUG)
+#if !defined(_DEBUG)
     ac.~AntiCheat();
 #endif // defined(_DEBUG)
     if (!data.localPlayer->behavior->trusted) {

@@ -14,6 +14,7 @@ public:
 		identify->classname = "entity_mine";
 		damage = r % 25;
 		origin = { r % 74 , r % 26 };
+		draw = false;
 	}
 	void recreate(int r) {
 		damage = r % 25;

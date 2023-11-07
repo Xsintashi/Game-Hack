@@ -146,8 +146,11 @@
     <ClInclude Include="SDK\BaseWeapon.h" />
     <ClInclude Include="Data.h" />
     <ClInclude Include="SDK\Behavior.h" />
+    <ClInclude Include="SDK\Bullet.h" />
+    <ClInclude Include="SDK\Directions.h" />
     <ClInclude Include="SDK\Entity.h" />
     <ClInclude Include="SDK\GlobalVars.h" />
+    <ClInclude Include="SDK\Macros.h" />
     <ClInclude Include="SDK\Mine.h" />
     <ClInclude Include="SDK\Player.h" />
     <ClInclude Include="SDK\Statistics.h" />

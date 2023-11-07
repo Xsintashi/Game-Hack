@@ -59,5 +59,14 @@
     <ClInclude Include="SDK\Behavior.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\Bullet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Directions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

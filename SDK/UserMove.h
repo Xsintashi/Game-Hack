@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include "Directions.h"
 
 enum UserMoveButtons {
 	ATTACK		= ( 1 << 0),
@@ -12,13 +13,6 @@ enum UserMoveButtons {
 	ROTATERIGHT	= ( 1 << 7),
 };
 
-enum class Rotations : char {
-	LEFT = 0,
-	RIGHT,
-	UP,
-	DOWN
-};
-
 class UserMove {
 public:
 	int backup = -1;
@@ -29,5 +23,5 @@ public:
 private:
 	std::byte __pad0x02[0x9];
 public:
-	Rotations rotation;
+	Directions direction;
 };

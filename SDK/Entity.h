@@ -16,5 +16,9 @@ public:
 private:
 	std::byte __pad0x01[0xFA];
 public:
+	bool draw;
+private:
+	std::byte __pad0x02[0xFC];
+public:
 	Vector2D origin;
 };
