@@ -6,13 +6,13 @@
 
 class Bullet : virtual public Entity {
 public:
-	Bullet(Directions d, Vector2D org) {
+	Bullet(bool draw_, Directions d, Vector2D org) {
 		identify = new EntityIdentify;
 		identify->name = "Bullet";
 		identify->classname = "entity_bullet";
 		direction = d;
 		origin = org;
-		draw = true;
+		draw = draw_;
 
 	}
 

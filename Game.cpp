@@ -131,6 +131,9 @@ void render() noexcept {
         if(data.enemy)
             printDaText(data.enemy->origin.x, data.enemy->origin.y, "@");
 
+        if (data.mine)
+            printDaText(data.mine->origin.x, data.mine->origin.y, "o");
+
         if(data.bullet && data.bullet->draw)
             printDaText(data.bullet->origin.x, data.bullet->origin.y, "*");
 
@@ -201,8 +204,8 @@ void update() noexcept {
             }
         }
 
-        if (!data.bullet || !data.bullet->draw && GetAsyncKeyState(VK_SPACE))
-            data.bullet = new Bullet{ data.localPlayer->userMove.direction, data.localPlayer->origin };
+        if (GetAsyncKeyState(VK_SPACE) && (!data.bullet || !data.bullet->draw))
+            data.bullet = new Bullet{true,  data.localPlayer->userMove.direction, data.localPlayer->origin };
 
         if (data.bullet && (uintptr_t)data.bullet != -1)
             data.bullet->update();
@@ -249,7 +252,7 @@ int main() {
     std::thread(&AntiCheat::overSleep, AntiCheat()).detach();
 #endif // defined(_DEBUG)
 
-    while (!GetAsyncKeyState(VK_END) && isRunning)
+    while (!GetAsyncKeyState(VK_INSERT) && isRunning)
         THREAD_SLEEP(10);
     
     isRunning = false;
