@@ -217,6 +217,7 @@ void render() noexcept {
 void update() noexcept {
     while (isRunning) {
         THREAD_SLEEP(32);
+        Lock lock;
         data.globalVars->tickCount = static_cast<float>(GetTickCount64() / 1000.f);
         const static float tickCountStatic = data.globalVars->tickCount;
         data.globalVars->currentTime = static_cast<float>(GetTickCount64() / 1000.f) - tickCountStatic;

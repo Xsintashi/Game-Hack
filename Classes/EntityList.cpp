@@ -17,7 +17,7 @@ bool EntityList::removeEntity(Entity* entity)  noexcept {
 }
 
 bool EntityList::removeEntity(idx index) noexcept {
-    if (this->entitylist.empty())
+    if (this->entitylist.size() <= index)
         return false;
     const auto& toDelete = this->entitylist[index];
     this->entitylist.erase(this->entitylist.begin() + index);
