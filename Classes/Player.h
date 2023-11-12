@@ -21,6 +21,7 @@ public:
 		origin = pos;
 		address = uintptr_t(this);
 		behavior = new Behavior;
+		userMove = new UserMove;
 
 		draw = true;
 
@@ -32,13 +33,13 @@ public:
 private:
 	std::byte __pad0x01[0xFA];
 public:
-	int health;
-	UserMove userMove;
+	bool isDead;
+	UserMove* userMove;
 	Statistics statistics;
 private:
 	std::byte __pad0x02[0x85];
 public:
-	bool isDead;
+	int health;
 private:
 	std::byte __pad0x03[0xA9];
 public:

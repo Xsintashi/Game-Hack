@@ -11,6 +11,9 @@ public:
 
 class Entity {
 public: 
+	Entity() {
+		address = (uintptr_t)this;
+	}
 	uintptr_t address;
 	EntityIdentify* identify;
 private:

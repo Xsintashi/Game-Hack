@@ -30,6 +30,8 @@
 *.exe
 *.out
 *.app
+*.log
+*.txt
 
 .vs
 

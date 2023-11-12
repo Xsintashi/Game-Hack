@@ -138,25 +138,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Classes\EntityList.cpp" />
     <ClCompile Include="Game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AntiCheat.h" />
+    <ClInclude Include="Classes\EntityList.h" />
     <ClInclude Include="Lock.h" />
-    <ClInclude Include="SDK\BaseWeapon.h" />
+    <ClInclude Include="Classes\BaseWeapon.h" />
     <ClInclude Include="Data.h" />
-    <ClInclude Include="SDK\Behavior.h" />
-    <ClInclude Include="SDK\Bullet.h" />
-    <ClInclude Include="SDK\Directions.h" />
-    <ClInclude Include="SDK\Entity.h" />
-    <ClInclude Include="SDK\GlobalVars.h" />
-    <ClInclude Include="SDK\Macros.h" />
-    <ClInclude Include="SDK\Mine.h" />
-    <ClInclude Include="SDK\Player.h" />
-    <ClInclude Include="SDK\Statistics.h" />
-    <ClInclude Include="SDK\UserMove.h" />
-    <ClInclude Include="SDK\Vector.h" />
-    <ClInclude Include="SDK\WeaponID.h" />
+    <ClInclude Include="Classes\Behavior.h" />
+    <ClInclude Include="Classes\Bullet.h" />
+    <ClInclude Include="Classes\Directions.h" />
+    <ClInclude Include="Classes\Entity.h" />
+    <ClInclude Include="Classes\GlobalVars.h" />
+    <ClInclude Include="Classes\Macros.h" />
+    <ClInclude Include="Classes\Mine.h" />
+    <ClInclude Include="Classes\Player.h" />
+    <ClInclude Include="Classes\Statistics.h" />
+    <ClInclude Include="Classes\UserMove.h" />
+    <ClInclude Include="Classes\Vector.h" />
+    <ClInclude Include="Classes\WeaponID.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitattributes" />
+    <None Include=".gitignore" />
+    <None Include="LICENSE" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

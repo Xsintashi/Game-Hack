@@ -1,10 +1,11 @@
 #pragma once
 #include "Entity.h"
+#include "EntityList.h"
 #include "Directions.h"
 #include "Macros.h"
 #include "Vector.h"
 
-class Bullet : virtual public Entity {
+class Bullet : public Entity {
 public:
 	Bullet(bool draw_, Directions d, Vector2D org) {
 		identify = new EntityIdentify;
@@ -33,7 +34,7 @@ public:
 			break;
 		}
 		if (origin.y <= TOPBORDER || origin.y >= BOTTOMBORDER || origin.x <= LEFTBORDER || origin.x >= RIGHTBORDER)
-			draw = false;
+			entityList->removeEntity(this);
 	}
 	Directions direction;
 

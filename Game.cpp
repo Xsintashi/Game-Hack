@@ -8,14 +8,19 @@
 
 #include "AntiCheat.h"
 #include "Data.h"
-#include "SDK/Bullet.h"
-#include "SDK/Entity.h"
-#include "SDK/Directions.h"
-#include "SDK/GlobalVars.h"
-#include "SDK/Macros.h"
-#include "SDK/Mine.h"
-#include "SDK/Player.h"
-#include "SDK/UserMove.h"
+#include "Classes/Bullet.h"
+#include "Classes/Entity.h"
+#include "Classes/EntityList.h"
+#include "Classes/Directions.h"
+#include "Classes/GlobalVars.h"
+#include "Classes/Macros.h"
+#include "Classes/Mine.h"
+#include "Classes/Player.h"
+#include "Classes/UserMove.h"
+
+constexpr int NUMBER_OF_MINES = 10;
+
+bool turnDebug = false;
 
 void showConsoleCursor(bool flag) {
     CONSOLE_CURSOR_INFO     cursorInfo;
@@ -26,8 +31,15 @@ void showConsoleCursor(bool flag) {
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
 
+void keysThread() {
+    while (isRunning) {
+        THREAD_SLEEP(100);
+        if (GetAsyncKeyState(VK_MENU) & 0x8000)
+            turnDebug = !turnDebug;
+    }
+}
 
-void printDaText(int x, int y, const char* str) noexcept {
+void printDaText(const int &x, const int &y, const char* str) noexcept {
     COORD pos = { static_cast<short>(x), static_cast<short>(y) };
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
     printf(str);
@@ -35,11 +47,11 @@ void printDaText(int x, int y, const char* str) noexcept {
 
 void clearScreen() noexcept {
     for (int i = 0; i < 27; i++){
-        printDaText(0, i, "                                                                                    ");
+        printDaText(0, i, "                                                                                                                                                                                         ");
     }
 }
 
-void setWindow(DWORD width, DWORD height) noexcept {
+void setWindow(const DWORD &width, const DWORD &height) noexcept {
     HWND console = GetConsoleWindow();
     RECT r;
     GetWindowRect(console, &r);
@@ -50,13 +62,13 @@ void setWindow(DWORD width, DWORD height) noexcept {
 void enemyAI() noexcept {
     while (isRunning) {
         THREAD_SLEEP(64);
-        if (!data.localPlayer)
+        if (!static_cast<Player*>(entityList->getEntity(0)))
             continue;
 
         if (!data.enemy)
             continue;
 
-        const auto& lpOrigin = data.localPlayer->origin;
+        const auto& lpOrigin = static_cast<Player*>(entityList->getEntity(0))->origin;
 
         const auto& origin = data.enemy->origin;
 
@@ -64,11 +76,6 @@ void enemyAI() noexcept {
             data.enemy->origin.x += origin.x < lpOrigin.x ? 1 : -1;
         if (lpOrigin.y != origin.y)
             data.enemy->origin.y += origin.y < lpOrigin.y ? 1 : -1;
-
-        if (data.bullet && data.enemy->origin == data.bullet->origin) {
-            data.enemy->randomSpawn(static_cast<int>(time(0) - 1));
-            data.bullet->draw = false;
-        }
     }
 }
 
@@ -88,22 +95,22 @@ void userMove(Player* player) noexcept {
             };
 
         int buttons = 0;
-        player->userMove.buttons = 0;
-        player->userMove.backup = -1;
+        player->userMove->buttons = 0;
+        player->userMove->backup = -1;
         if (GetKeyState('W') & 0x8000){
-            buttons |= UserMoveButtons::FORWARD; player->userMove.direction = Directions::UP;
+            buttons |= UserMoveButtons::FORWARD; player->userMove->direction = Directions::UP;
         }
         if (GetKeyState('A') & 0x8000){
-            buttons |= UserMoveButtons::LEFT; player->userMove.direction = Directions::LEFT;
+            buttons |= UserMoveButtons::LEFT; player->userMove->direction = Directions::LEFT;
         }
         if (GetKeyState('S') & 0x8000) {
-            buttons |= UserMoveButtons::BACKWARD; player->userMove.direction = Directions::DOWN;
+            buttons |= UserMoveButtons::BACKWARD; player->userMove->direction = Directions::DOWN;
         }
         if (GetKeyState('D') & 0x8000) {
-            buttons |= UserMoveButtons::RIGHT; player->userMove.direction = Directions::RIGHT;
+            buttons |= UserMoveButtons::RIGHT; player->userMove->direction = Directions::RIGHT;
         }
 
-        setBoth( player->userMove.buttons, player->userMove.backup, buttons);
+        setBoth( player->userMove->buttons, player->userMove->backup, buttons);
     }
 }
 
@@ -113,76 +120,96 @@ void render() noexcept {
 
         Lock lock;
 //#if defined(_DEBUG)
-        if(GetAsyncKeyState(VK_MENU))
-            setWindow(data.globalVars->width + 360, data.globalVars->height);
+        if(turnDebug)
+            setWindow(data.globalVars->width + 768, data.globalVars->height);
         else
 //#endif
             setWindow(data.globalVars->width, data.globalVars->height);
 
-        if (!data.localPlayer)
+        if (!static_cast<Player*>(entityList->getEntity(0)))
             continue;
 
         showConsoleCursor(false);
 
-        if (data.localPlayer->health < 1)
+        if (static_cast<Player*>(entityList->getEntity(0))->health < 1)
             continue;
         clearScreen();
-        printDaText(0, 0, std::string("Nick: " + data.localPlayer->nickname).c_str());
+        printDaText(0, 0, std::string("Nick: " + static_cast<Player*>(entityList->getEntity(0))->nickname).c_str());
         if(data.enemy)
             printDaText(data.enemy->origin.x, data.enemy->origin.y, "@");
 
-        if (data.mine)
-            printDaText(data.mine->origin.x, data.mine->origin.y, "o");
+        const auto& mines = entityList->findEntitiesByClassName("entity_mine");
+        for (const auto& it : mines)
+            printDaText(it->origin.x, it->origin.y, "o");
 
-        if(data.bullet && data.bullet->draw)
-            printDaText(data.bullet->origin.x, data.bullet->origin.y, "*");
+        const auto& bullets = entityList->findEntitiesByClassName("entity_bullet");
+        for (const auto& it : bullets)
+            printDaText(it->origin.x, it->origin.y, "*");
 
         if (GetAsyncKeyState(VK_TAB)) {
-            printDaText(0, 25, std::string("Score: " + std::to_string(data.localPlayer->statistics.score)).c_str());
+            printDaText(0, 25, std::string("Score: " + std::to_string(static_cast<Player*>(entityList->getEntity(0))->statistics.score)).c_str());
         }
 #if defined(_DEBUG)
-        if (GetAsyncKeyState(VK_MENU)) {
+        if (turnDebug) {
 
-            const std::string byteArrayBackup = std::bitset<8>(data.localPlayer->userMove.backup).to_string();
-            const std::string byteArrayButtons = std::bitset<8>(data.localPlayer->userMove.buttons).to_string();
+            const std::string byteArrayBackup = std::bitset<8>(static_cast<Player*>(entityList->getEntity(0))->userMove->backup).to_string();
+            const std::string byteArrayButtons = std::bitset<8>(static_cast<Player*>(entityList->getEntity(0))->userMove->buttons).to_string();
 
             for (int i = 0; i < 27; i++)
-            {
                 printDaText(75, i, "|                                            ");
-            }
 
             printDaText(77, 0, "Debug:");
             printDaText(77, 2, "UserMode:");
-            printDaText(77, 3, std::string("  Backup:  ").append(byteArrayBackup).append(" | ").append(std::to_string(data.localPlayer->userMove.backup)).c_str());
-            printDaText(77, 4, std::string("  Buttons: ").append(byteArrayButtons).append(" |  ").append(std::to_string(data.localPlayer->userMove.buttons)).c_str());
+            printDaText(77, 3, std::string("  Backup:  ").append(byteArrayBackup).append(" | ").append(std::to_string(static_cast<Player*>(entityList->getEntity(0))->userMove->backup)).c_str());
+            printDaText(77, 4, std::string("  Buttons: ").append(byteArrayButtons).append(" |  ").append(std::to_string(static_cast<Player*>(entityList->getEntity(0))->userMove->buttons)).c_str());
             printDaText(77, 6, "GlobalVars:");
             printDaText(77, 7, std::string("  TickCount: ").append(std::to_string(data.globalVars->tickCount)).c_str());
             printDaText(77, 8, std::string("  CurrentTime: ").append(std::to_string(data.globalVars->currentTime)).c_str());
             printDaText(77, 9, std::string("  Width: ").append(std::to_string(data.globalVars->width)).c_str());
             printDaText(77, 10, std::string("  Height: ").append(std::to_string(data.globalVars->height)).c_str());
-            printDaText(77, 12, std::string("LocalPlayer: 0x").append(std::format("{:x}", data.localPlayer->address)).c_str());
-            printDaText(77, 13, std::string("  Entity Classname: ").append(data.localPlayer->identify->classname).c_str());
-            printDaText(77, 14, std::string("  Entity Name: ").append(data.localPlayer->identify->name).c_str());
-            printDaText(77, 15, std::string("  Nick: ").append(data.localPlayer->nickname).c_str());
-            printDaText(77, 16, std::string("  Origin: x: ").append(std::to_string(data.localPlayer->origin.x)).append(" y: ").append(std::to_string(data.localPlayer->origin.y)).c_str());
-            printDaText(77, 17, std::string("  Behaviour: 0x").append(std::format("{:x}", (uintptr_t)data.localPlayer->behavior)).c_str());
-            printDaText(77, 18, std::string("    Trusted: ").append(data.localPlayer->behavior->trusted ? "Yes (" : "No (").append(std::to_string(data.localPlayer->behavior->level)).append(")").c_str());
-            printDaText(77, 19, std::string("    Time: ").append(std::to_string(data.localPlayer->behavior->time)).c_str());
-            printDaText(77, 20, std::string("    Reason: ").append(std::to_string((int)data.localPlayer->behavior->reason)).c_str());
+            printDaText(77, 12, std::string("LocalPlayer: 0x").append(std::format("{:x}", static_cast<Player*>(entityList->getEntity(0))->address)).c_str());
+            printDaText(77, 13, std::string("  Entity Classname: ").append(static_cast<Player*>(entityList->getEntity(0))->identify->classname).c_str());
+            printDaText(77, 14, std::string("  Entity Name: ").append(static_cast<Player*>(entityList->getEntity(0))->identify->name).c_str());
+            printDaText(77, 15, std::string("  Nick: ").append(static_cast<Player*>(entityList->getEntity(0))->nickname).c_str());
+            printDaText(77, 16, std::string("  Origin: x: ").append(std::to_string(static_cast<Player*>(entityList->getEntity(0))->origin.x)).append(" y: ").append(std::to_string(static_cast<Player*>(entityList->getEntity(0))->origin.y)).c_str());
+            printDaText(77, 17, std::string("  Behaviour: 0x").append(std::format("{:x}", (uintptr_t)static_cast<Player*>(entityList->getEntity(0))->behavior)).c_str());
+            printDaText(77, 18, std::string("    Trusted: ").append(static_cast<Player*>(entityList->getEntity(0))->behavior->trusted ? "Yes (" : "No (").append(std::to_string(static_cast<Player*>(entityList->getEntity(0))->behavior->level)).append(")").c_str());
+            printDaText(77, 19, std::string("    Time: ").append(std::to_string(static_cast<Player*>(entityList->getEntity(0))->behavior->time)).c_str());
+            printDaText(77, 20, std::string("    Reason: ").append(std::to_string((int)static_cast<Player*>(entityList->getEntity(0))->behavior->reason)).c_str());
+
+            printDaText(77 + 36, 0, "Entity List:");
+            int highest = entityList->getHighestEntityIndex();
+            const auto& entitylist = entityList->get();
+            highest = std::clamp(highest, 0, 26);
+            for (int i = 0; i < highest /* 26 is max we can render : ( */ ; i++) {
+                std::string text = " ";
+                text += std::to_string(i);
+                if(i < 10)
+                text += "  -> [0x";
+                else
+                text += " -> [0x";
+                text += std::format("{:x}", entitylist[i]->address );
+                text += "] -> ";
+                text += entitylist[i]->identify->classname;
+
+                printDaText(77 + 36, i+1, text.c_str());
+
+            }
+                
 
         }
 #endif
-        printDaText(0, 26, std::string("HP: " + std::to_string(data.localPlayer->health)).c_str());
-        printDaText(data.localPlayer->origin.x, data.localPlayer->origin.y, "#");
+        printDaText(0, 26, std::string("HP: " + std::to_string(static_cast<Player*>(entityList->getEntity(0))->health)).c_str());
+        printDaText(static_cast<Player*>(entityList->getEntity(0))->origin.x, static_cast<Player*>(entityList->getEntity(0))->origin.y, "#");
 
-        if (data.localPlayer->userMove.buttons & UserMoveButtons::FORWARD)
-            data.localPlayer->origin.y -= 1;
-        if (data.localPlayer->userMove.buttons & UserMoveButtons::LEFT)
-            data.localPlayer->origin.x -= 1;
-        if (data.localPlayer->userMove.buttons & UserMoveButtons::BACKWARD)
-            data.localPlayer->origin.y += 1;
-        if (data.localPlayer->userMove.buttons & UserMoveButtons::RIGHT)
-            data.localPlayer->origin.x += 1;
+        if (static_cast<Player*>(entityList->getEntity(0))->userMove->buttons & UserMoveButtons::FORWARD)
+            static_cast<Player*>(entityList->getEntity(0))->origin.y -= 1;
+        if (static_cast<Player*>(entityList->getEntity(0))->userMove->buttons & UserMoveButtons::LEFT)
+            static_cast<Player*>(entityList->getEntity(0))->origin.x -= 1;
+        if (static_cast<Player*>(entityList->getEntity(0))->userMove->buttons & UserMoveButtons::BACKWARD)
+            static_cast<Player*>(entityList->getEntity(0))->origin.y += 1;
+        if (static_cast<Player*>(entityList->getEntity(0))->userMove->buttons & UserMoveButtons::RIGHT)
+            static_cast<Player*>(entityList->getEntity(0))->origin.x += 1;
 
     }
 }
@@ -194,34 +221,47 @@ void update() noexcept {
         const static float tickCountStatic = data.globalVars->tickCount;
         data.globalVars->currentTime = static_cast<float>(GetTickCount64() / 1000.f) - tickCountStatic;
 
-        if (!data.localPlayer)
+        if (!static_cast<Player*>(entityList->getEntity(0)))
             continue;
 
-        if (data.mine){
-            if (data.localPlayer->origin == data.mine->origin) {
-                data.localPlayer->health -= data.mine->damage;
-                data.mine->recreate(static_cast<int>(time(0) - 1));
+
+        const auto mines = entityList->findEntitiesByClassName("entity_mine");
+        for (const auto& it_ : mines) {
+            Mine* it = static_cast<Mine*>(it_);
+            if (static_cast<Player*>(entityList->getEntity(0))->origin == it->origin) {
+                static_cast<Player*>(entityList->getEntity(0))->health -= it->damage;
+                it->recreate(static_cast<int>(time(0) - 1));
             }
         }
 
-        if (GetAsyncKeyState(VK_SPACE) && (!data.bullet || !data.bullet->draw))
-            data.bullet = new Bullet{true,  data.localPlayer->userMove.direction, data.localPlayer->origin };
-
-        if (data.bullet && (uintptr_t)data.bullet != -1)
-            data.bullet->update();
+        static int cooldown = 32;
+        if (GetAsyncKeyState(VK_SPACE) && cooldown == 0) {
+            entityList->addEntity(new Bullet{ true,  static_cast<Player*>(entityList->getEntity(0))->userMove->direction, static_cast<Player*>(entityList->getEntity(0))->origin });
+            cooldown = 32;
+        }
         
-        if (data.localPlayer->health < 1)
+        if (cooldown > 0)
+            cooldown--;
+
+        const auto& bullets = entityList->findEntitiesByClassName("entity_bullet");
+        for (const auto& it_ : bullets) {
+            Bullet* it = static_cast<Bullet*>(it_);
+            it->update();
+        }
+        
+        if (static_cast<Player*>(entityList->getEntity(0))->health < 1)
             printDaText(32, 12, "YOU DIED!");
 
-        const auto& origin = data.localPlayer->origin;
-        data.localPlayer->origin.x = std::clamp(origin.x, 0, 74);
-        data.localPlayer->origin.y = std::clamp(origin.y, 0, 26);
+        const auto& origin = static_cast<Player*>(entityList->getEntity(0))->origin;
+        static_cast<Player*>(entityList->getEntity(0))->origin.x = std::clamp(origin.x, 0, 74);
+        static_cast<Player*>(entityList->getEntity(0))->origin.y = std::clamp(origin.y, 0, 26);
 
     }
 }
 
 int main() {
     data.globalVars = new GlobalVars;
+    entityList = new EntityList;
     isRunning = true;
     data.globalVars->width = 640;
     data.globalVars->height = 480;
@@ -234,18 +274,15 @@ int main() {
     std::cout << "Hello World!\nProvide your username: ";
     char buffname[16];
     std::cin >> buffname;
-
-     char botName[64] = "BOT Dzjuseppe";
-
-    data.localPlayer = new Player{ buffname, { 37,13 } };
-    data.enemy = new Player{ botName, {0,0} };
-
-    std::thread(userMove, data.localPlayer).detach();
-    std::thread(enemyAI).detach();
+    entityList->addEntity(new Player{ buffname, { 37,13 } });
+    
+    std::thread(userMove, static_cast<Player*>(entityList->getEntity(0))).detach();
+    std::thread(keysThread).detach();
+    //std::thread(enemyAI).detach();
 
     srand(static_cast<int>(time(0)));
-    data.mine = new Mine{ rand() };
-
+    for (size_t i = 0; i < NUMBER_OF_MINES; i++) // We add 10 Mines to game
+        entityList->addEntity(new Mine{ rand()});
 #if !defined(_DEBUG)
     AntiCheat ac;
     std::thread(&AntiCheat::thread, AntiCheat()).detach();
@@ -260,7 +297,7 @@ int main() {
 #if !defined(_DEBUG)
     ac.~AntiCheat();
 #endif // defined(_DEBUG)
-    if (!data.localPlayer->behavior->trusted) {
+    if (!static_cast<Player*>(entityList->getEntity(0))->behavior->trusted) {
         printDaText(32, 12, "You have been Banned!");
         while (!GetAsyncKeyState(VK_SPACE))
             THREAD_SLEEP(10);

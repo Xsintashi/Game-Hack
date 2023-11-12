@@ -18,36 +18,39 @@
     <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Classes\EntityList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SDK\Player.h">
+    <ClInclude Include="Classes\Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\Statistics.h">
+    <ClInclude Include="Classes\Statistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\UserMove.h">
+    <ClInclude Include="Classes\UserMove.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\GlobalVars.h">
+    <ClInclude Include="Classes\GlobalVars.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\Vector.h">
+    <ClInclude Include="Classes\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\Mine.h">
+    <ClInclude Include="Classes\Mine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\BaseWeapon.h">
+    <ClInclude Include="Classes\BaseWeapon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\WeaponID.h">
+    <ClInclude Include="Classes\WeaponID.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\Entity.h">
+    <ClInclude Include="Classes\Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AntiCheat.h">
@@ -56,17 +59,25 @@
     <ClInclude Include="Lock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\Behavior.h">
+    <ClInclude Include="Classes\Behavior.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\Bullet.h">
+    <ClInclude Include="Classes\Bullet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\Directions.h">
+    <ClInclude Include="Classes\Directions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\Macros.h">
+    <ClInclude Include="Classes\Macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Classes\EntityList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitattributes" />
+    <None Include=".gitignore" />
+    <None Include="LICENSE" />
   </ItemGroup>
 </Project>

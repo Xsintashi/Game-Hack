@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SDK/Entity.h"
-#include "SDK/Player.h"
-#include "SDK/GlobalVars.h"
+#include "Classes/Entity.h"
+#include "Classes/Player.h"
+#include "Classes/GlobalVars.h"
 #include "Data.h"
 
 #include <chrono>
@@ -21,7 +21,7 @@ public:
 			static auto buffTick = GetTickCount64();
 			THREAD_SLEEP(1000);
 			if (GetTickCount64() - buffTick > 1500) { // Slept a lil too much
-				data.localPlayer->behavior->trusted = false;
+				player->behavior->trusted = false;
 				isRunning = false;
 				return true;
 			}
@@ -35,7 +35,7 @@ public:
 		while (isRunning || turned) {
 			THREAD_SLEEP(128);
 			Lock lock;
-			auto& lvl = data.localPlayer->behavior->level;
+			auto& lvl = player->behavior->level;
 			if (static_cast<int>(data.globalVars->tickCount) % 10 == 1) {
 				lvl++;
 				lvl = std::clamp(lvl, 0, 100);
@@ -43,20 +43,20 @@ public:
 #if !defined(_DEBUG)
 			if (IsDebuggerPresent()) {
 				// Debugger is present closing game in a few seconds
-				data.localPlayer->behavior->level = 1;
+				player->behavior->level = 1;
 				THREAD_SLEEP((static_cast<DWORD>(data.globalVars->tickCount * 100) % 15) * 1000);
-				data.localPlayer->behavior->trusted= false;
+				player->behavior->trusted= false;
 				isRunning = false;
 			}
 #endif
-			const auto lUserMove = data.localPlayer->userMove;
-			if (data.localPlayer->health < 101 && verifyUserMove(lUserMove.buttons, lUserMove.backup))
+			const auto lUserMove = player->userMove;
+			if (player->health < 101 && verifyUserMove(lUserMove->buttons, lUserMove->backup))
 				continue;
 
 			incorrections++;
 			lvl = 100 - incorrections;
 			if (lvl < 1) {
-				data.localPlayer->behavior->trusted = false;
+				player->behavior->trusted = false;
 				isRunning = false;
 			}
 		}
@@ -70,7 +70,8 @@ public:
 	int incorrections = 0;
 	bool turned = false;
 public:
-	AntiCheat() {
+	AntiCheat(Player* localPlayer) {
+		player = localPlayer;
 		turned = true;
 	}
 
@@ -79,5 +80,8 @@ public:
 		incorrections = 0;
 		turned = false;
 	}
+private:
+
+	Player* player;
 };
 
