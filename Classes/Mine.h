@@ -22,10 +22,10 @@ public:
 		origin = { r % 74 , r % 26 };
 	}
 private:
-	std::byte __pad0x02[0x2D];
+	[[maybe_unused]] std::byte __pad0x02[0x2D];
 public:
 	int damage;
 private:
-	std::byte __pad0x03[0x10];
+	[[maybe_unused]] std::byte __pad0x03[0x10];
 public:	
 };

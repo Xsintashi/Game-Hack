@@ -32,21 +32,21 @@ public:
 		behavior->time = 0;
 	}
 private:
-	std::byte __pad0x01[0xFA];
+	[[maybe_unused]] std::byte __pad0x01[0xFA];
 public:
 	bool isDead;
 	UserMove* userMove;
 	Statistics statistics;
 private:
-	std::byte __pad0x02[0x85];
+	[[maybe_unused]] std::byte __pad0x02[0x85];
 public:
 	int health;
 private:
-	std::byte __pad0x03[0xA9];
+	[[maybe_unused]] std::byte __pad0x03[0xA9];
 public:
 	std::string nickname;
 private:
-	std::byte __pad0x04[0xCC];
+	[[maybe_unused]] std::byte __pad0x04[0xCC];
 public:
 	Behavior* behavior;
 

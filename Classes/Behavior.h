@@ -11,12 +11,12 @@ enum class Reason : char {
 
 class Behavior {
 private:
-	std::byte __pad0x01[0xAA];
+	[[maybe_unused]] std::byte __pad0x01[0xAA];
 public:
 	bool trusted;
 	int level;
 private:
-	std::byte __pad0x02[0x10];
+	[[maybe_unused]] std::byte __pad0x02[0x10];
 public:
 	unsigned long long time;
 	Reason reason;

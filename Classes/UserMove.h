@@ -17,11 +17,11 @@ class UserMove {
 public:
 	int backup = -1;
 private:
-	std::byte __pad0x01[0x21];
+	[[maybe_unused]] std::byte __pad0x01[0x21];
 public:
 	int buttons;
 private:
-	std::byte __pad0x02[0x9];
+	[[maybe_unused]] std::byte __pad0x02[0x9];
 public:
 	Directions direction;
 };

@@ -17,12 +17,12 @@ public:
 	uintptr_t address;
 	EntityIdentify* identify;
 private:
-	std::byte __pad0x01[0xFA];
+	[[maybe_unused]] std::byte __pad0x01[0xFA];
 public:
 	bool draw;
 	char charDraw;
 private:
-	std::byte __pad0x02[0xFC];
+	[[maybe_unused]] std::byte __pad0x02[0xFC];
 public:
 	Vector2D origin;
 };
