@@ -17,6 +17,7 @@
 #include "Classes/Macros.h"
 #include "Classes/Mine.h"
 #include "Classes/Player.h"
+#include "Classes/Point.h"
 #include "Classes/UserMove.h"
 
 constexpr int NUMBER_OF_MINES = 10;
@@ -110,6 +111,9 @@ void userMove(Player* player) noexcept {
         if (GetKeyState('D') & 0x8000) {
             buttons |= UserMoveButtons::RIGHT; player->userMove->direction = Directions::RIGHT;
         }
+        if (GetKeyState(VK_SPACE) & 0x8000) {
+            buttons |= UserMoveButtons::ATTACK;
+        }
 
         setBoth( player->userMove->buttons, player->userMove->backup, buttons);
     }
@@ -130,10 +134,11 @@ void render() noexcept {
         if (!localPlayer)
             continue;
 
-        showConsoleCursor(false);
-
         if (localPlayer->health < 1)
             continue;
+
+        showConsoleCursor(false);
+
         clearScreen();
         printDaText(0, 0, std::string("Nick: " + localPlayer->nickname).c_str());
         if(data.enemy)
@@ -141,11 +146,15 @@ void render() noexcept {
 
         const auto& mines = entityList->findEntitiesByClassName("entity_mine");
         for (const auto& it : mines)
-            printDaText(it->origin.x, it->origin.y, "o");
+            printDaText(it->origin.x, it->origin.y, &it->charDraw);
 
         const auto& bullets = entityList->findEntitiesByClassName("entity_bullet");
         for (const auto& it : bullets)
-            printDaText(it->origin.x, it->origin.y, "*");
+            printDaText(it->origin.x, it->origin.y, &it->charDraw);
+
+        const auto& points = entityList->findEntitiesByClassName("entity_scorepoint");
+        for (const auto& it : points)
+            printDaText(it->origin.x, it->origin.y, &it->charDraw);
 
         if (GetAsyncKeyState(VK_TAB)) {
             printDaText(0, 25, std::string("Score: " + std::to_string(localPlayer->statistics.score)).c_str());
@@ -201,7 +210,10 @@ void render() noexcept {
         }
 #endif
         printDaText(0, 26, std::string("HP: " + std::to_string(localPlayer->health)).c_str());
-        printDaText(localPlayer->origin.x, localPlayer->origin.y, "#");
+        printDaText(localPlayer->origin.x, localPlayer->origin.y, &localPlayer->charDraw);
+        static int cooldown = 32;
+        if (cooldown > 0)
+            cooldown--;
 
         if (localPlayer->userMove->buttons & UserMoveButtons::FORWARD)
             localPlayer->origin.y -= 1;
@@ -211,6 +223,10 @@ void render() noexcept {
             localPlayer->origin.y += 1;
         if (localPlayer->userMove->buttons & UserMoveButtons::RIGHT)
             localPlayer->origin.x += 1;
+        if (localPlayer->userMove->buttons & UserMoveButtons::ATTACK && cooldown == 0) {
+            entityList->addEntity(new Bullet{ true,  localPlayer->userMove->direction, localPlayer->origin });
+            cooldown = 32;
+        }
 
     }
 }
@@ -232,18 +248,18 @@ void update() noexcept {
             Mine* it = static_cast<Mine*>(it_);
             if (localPlayer->origin == it->origin) {
                 localPlayer->health -= it->damage;
-                it->recreate(static_cast<int>(time(0) - 1));
+                it->recreate(rand());
             }
         }
 
-        static int cooldown = 32;
-        if (GetAsyncKeyState(VK_SPACE) && cooldown == 0) {
-            entityList->addEntity(new Bullet{ true,  localPlayer->userMove->direction, localPlayer->origin });
-            cooldown = 32;
+        const auto points = entityList->findEntitiesByClassName("entity_scorepoint");
+        for (const auto& it_ : points) {
+            Point* it = static_cast<Point*>(it_);
+            if (localPlayer->origin == it->origin) {
+                localPlayer->statistics.score++;
+                it->recreate(rand());
+            }
         }
-        
-        if (cooldown > 0)
-            cooldown--;
 
         const auto& bullets = entityList->findEntitiesByClassName("entity_bullet");
         for (const auto& it_ : bullets) {
@@ -286,6 +302,7 @@ int main() {
     srand(static_cast<int>(time(0)));
     for (size_t i = 0; i < NUMBER_OF_MINES; i++) // We add 10 Mines to game
         entityList->addEntity(new Mine{ rand()});
+    entityList->addEntity(new Point{ rand() });
 #if !defined(_DEBUG)
     AntiCheat ac;
     std::thread(&AntiCheat::thread, AntiCheat(localPlayer.get())).detach();

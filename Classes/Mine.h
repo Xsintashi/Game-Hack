@@ -15,6 +15,7 @@ public:
 		damage = r % 25;
 		origin = { r % 74 , r % 26 };
 		draw = false;
+		charDraw = '*';
 	}
 	void recreate(int r) {
 		damage = r % 25;

@@ -14,6 +14,7 @@ public:
 		direction = d;
 		origin = org;
 		draw = draw_;
+		charDraw = '.';
 
 	}
 

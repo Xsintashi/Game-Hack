@@ -24,6 +24,7 @@ public:
 		userMove = new UserMove;
 
 		draw = true;
+		charDraw = '#';
 
 		behavior->trusted = true;
 		behavior->level = 100;

@@ -20,6 +20,7 @@ private:
 	std::byte __pad0x01[0xFA];
 public:
 	bool draw;
+	char charDraw;
 private:
 	std::byte __pad0x02[0xFC];
 public:

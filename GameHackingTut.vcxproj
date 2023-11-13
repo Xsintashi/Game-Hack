@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="AntiCheat.h" />
     <ClInclude Include="Classes\EntityList.h" />
+    <ClInclude Include="Classes\Point.h" />
     <ClInclude Include="Classes\LocalPLayer.h" />
     <ClInclude Include="Lock.h" />
     <ClInclude Include="Classes\BaseWeapon.h" />
