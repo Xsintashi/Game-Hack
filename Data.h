@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 class GlobalVars;
 class Player;
 class Mine;
@@ -10,10 +12,14 @@ class EntityList;
 
 struct Data {
 	GlobalVars* globalVars;
-	Player* enemy;
+	bool turnDebug = false;
+
+	std::string username;
 };
 
 inline Data data;
 inline EntityList* entityList;
+
+inline constexpr int NUMBER_OF_MINES = 10;
 
 inline bool isRunning = true;

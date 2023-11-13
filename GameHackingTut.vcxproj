@@ -140,12 +140,14 @@
   <ItemGroup>
     <ClCompile Include="Classes\EntityList.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AntiCheat.h" />
     <ClInclude Include="Classes\EntityList.h" />
     <ClInclude Include="Classes\Point.h" />
     <ClInclude Include="Classes\LocalPLayer.h" />
+    <ClInclude Include="GUI.h" />
     <ClInclude Include="Lock.h" />
     <ClInclude Include="Classes\BaseWeapon.h" />
     <ClInclude Include="Data.h" />

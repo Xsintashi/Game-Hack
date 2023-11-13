@@ -11,7 +11,7 @@
 
 class Player : public Entity {
 public:
-	Player(char name[64], Vector2D pos) {
+	Player(std::string name, Vector2D pos) {
 		identify = new EntityIdentify;
 		identify->name = "Player";
 		identify->classname = "entity_player";
