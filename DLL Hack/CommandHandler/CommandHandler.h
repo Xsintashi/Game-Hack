@@ -59,7 +59,7 @@ private:
 		Sleep(100);
 		uintptr_t baseAddress = mem->GetModuleBaseAddress(__GAME__);
 
-		const auto& localPlayer = mem->Read<uintptr_t>(baseAddress + 0x8788);
+		const auto& localPlayer = mem->Read<uintptr_t>(baseAddress + 0x9778);
 
 		if (!localPlayer) {
 			printf("LocalPlayer not found! \n");
@@ -71,20 +71,21 @@ private:
 			for (int i = 0; i < 8; i++) {
 				Helpers::printText(0, i, "                        ");
 			}
-			const auto& health = mem->Read<int>(localPlayer + 0x30C);
-			const auto& UserModeMask = mem->Read<int>(localPlayer + 0x310);
-			const auto& UserModeButtons = mem->Read<int>(localPlayer + 0x338);
+			const auto& health = mem->Read<int>(localPlayer + 0x3B4);
+			const auto& userMove = mem->Read<uintptr_t>(localPlayer + 0x310);
+			const auto& userModeMask = mem->Read<int>(userMove);
+			const auto& userModeButtons = mem->Read<int>(userMove + 0x28);
 			//const auto& UserModeDirection = mem->Read<short>(localPlayer + 0x344);
 
-			const std::string byteArrayBackup = std::bitset<8>(UserModeMask).to_string();
-			const std::string byteArrayButtons = std::bitset<8>(UserModeButtons).to_string();
+			const std::string byteArrayBackup = std::bitset<8>(userModeMask).to_string();
+			const std::string byteArrayButtons = std::bitset<8>(userModeButtons).to_string();
 
 			Helpers::printText(0, 0, "Debug: (Press end to Stop!)");
 			Helpers::printText(0, 2, std::string("LocalPlayer: 0x").append(std::format("{:x}", localPlayer)).c_str());
-			Helpers::printText(0, 3, std::string(" Health: ").append(std::to_string(health)).c_str());
+			Helpers::printText(0, 3, std::string(" Health: ").append(std::to_string(health)).append("        ").c_str());
 			Helpers::printText(0, 4, std::string(" UserMode:").c_str());
-			Helpers::printText(0, 5, std::string("  Backup:  ").append(byteArrayBackup).append(" | ").append(std::to_string(UserModeMask)).c_str());
-			Helpers::printText(0, 6, std::string("  Buttons: ").append(byteArrayButtons).append(" |  ").append(std::to_string(UserModeButtons)).c_str());
+			Helpers::printText(0, 5, std::string("  Backup:  ").append(byteArrayBackup).append(" | ").append(std::to_string(userModeMask)).append("        ").c_str());
+			Helpers::printText(0, 6, std::string("  Buttons: ").append(byteArrayButtons).append(" |  ").append(std::to_string(userModeButtons)).append("        ").c_str());
 		}
 	}
 };

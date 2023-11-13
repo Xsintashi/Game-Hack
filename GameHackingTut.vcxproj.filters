@@ -74,10 +74,14 @@
     <ClInclude Include="Classes\EntityList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Classes\LocalPLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="LICENSE" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

@@ -7,7 +7,7 @@
 #ifndef PCH_H
 #define PCH_H
 
-#define __GAME__            "GameHacking.exe"
+#define __GAME__            "Game.exe"
 
 #if defined(_DEBUG)
 #define __CONFIGURATION__   "Debug"

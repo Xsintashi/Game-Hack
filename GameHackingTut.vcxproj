@@ -24,7 +24,7 @@
     <ProjectGuid>{58a22be3-2c5a-439b-af40-11c1b8d884b6}</ProjectGuid>
     <RootNamespace>GameHackingTut</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>GameHacking</ProjectName>
+    <ProjectName>Game</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="AntiCheat.h" />
     <ClInclude Include="Classes\EntityList.h" />
+    <ClInclude Include="Classes\LocalPLayer.h" />
     <ClInclude Include="Lock.h" />
     <ClInclude Include="Classes\BaseWeapon.h" />
     <ClInclude Include="Data.h" />
@@ -164,6 +165,7 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="LICENSE" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

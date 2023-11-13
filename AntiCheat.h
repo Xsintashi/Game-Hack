@@ -80,6 +80,9 @@ public:
 		incorrections = 0;
 		turned = false;
 	}
+
+	AntiCheat() = default;
+
 private:
 
 	Player* player;
