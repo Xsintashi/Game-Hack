@@ -1,40 +1,35 @@
 #include "../pch.h"
 #include "hooks.h"
+#include "Utils.h"
 #include <stdio.h>
 
 #include "../minhook/include/MinHook.h"
 
 namespace Offsets {
-    constexpr uintptr_t text = 0x5614; // 4c 89 6c 24 ? 48 c7 44 24 ? ? ? ? ? 44 88 6c 24 ? 44 89 6c 24
-    constexpr uintptr_t hp = 0x203D; // 29 88
+    constexpr uintptr_t screenUpdate = 0x61F0; // 8b 0d ? ? ? ? 85 c9 74 ? 83 e9 ? 74 ? 83 e9 ? 74 ? 83 f9 ? 75 ? e8
+
+    constexpr uintptr_t dwLocalPlayer = 0x10BC0;
 }
 
 uintptr_t base = (uintptr_t)GetModuleHandle(__GAME__);
 void* localPlayer;
-typedef void(__stdcall* TextFunction)();
-typedef void(__stdcall* HealthFunction)();
+typedef void(__stdcall* UpdateScreenFunction)();
 
-TextFunction textFunction = TextFunction(base + Offsets::text);
-TextFunction textFunctionOriginal;
+UpdateScreenFunction updateScreenFunction = UpdateScreenFunction(base + Offsets::screenUpdate);
+UpdateScreenFunction updateScreenFunctionOriginal;
 
-HealthFunction healthFunction = HealthFunction(base + Offsets::hp);
-HealthFunction healthFunctionOriginal;
 
 void updateStuff() {
-    localPlayer = *reinterpret_cast<void**>(base + 0x10BC0);
+    localPlayer = *reinterpret_cast<void**>(base + Offsets::dwLocalPlayer);
 }
 
-void WINAPI textHook() {
+void WINAPI updateScreen() {
     updateStuff();
-    printf(" xs9 Hook dll Test! :D, LocalPlayer: 0x%p\n", localPlayer);
-    textFunctionOriginal();
-}
-
-void WINAPI healthHook() {
-    int& hp = *reinterpret_cast<int*>(reinterpret_cast<unsigned*>(localPlayer) + 0x3B4 /*Health*/);
-    hp = 100;
-    healthFunctionOriginal();
-
+    printOnScreen(0, 1, "xs9 Hook dll Test! :D");
+    if (GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+        printOnScreen(0, 1, "LocalPlayer: 0x%p", localPlayer);
+    }
+    updateScreenFunctionOriginal();
 }
 
 void Hooks::init() noexcept {
@@ -48,8 +43,7 @@ void Hooks::init() noexcept {
 }
 
 void Hooks::create() noexcept {
-    MH_CreateHook(textFunction, &textHook, reinterpret_cast<LPVOID*>(&textFunctionOriginal));
-    MH_CreateHook(healthFunction, &healthHook, reinterpret_cast<LPVOID*>(&healthFunctionOriginal));
+    MH_CreateHook(updateScreenFunction, &updateScreen, reinterpret_cast<LPVOID*>(&updateScreenFunctionOriginal));
 }
 
 void Hooks::enable() noexcept {
