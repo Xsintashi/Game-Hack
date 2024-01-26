@@ -40,7 +40,7 @@ void userMove(Player* player) noexcept {
             constexpr unsigned mask = 0xFFFFFFFF;
             v1 = value;
             v2 = value ^ mask;
-            };
+        };
 
         int buttons = 0;
         player->userMove->buttons = 0;
