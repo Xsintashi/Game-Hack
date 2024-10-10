@@ -25,7 +25,15 @@ DWORD WINAPI entryThread(LPVOID param) noexcept {
     } else { // Injected to game !!!
         Hooks hook;
         hook.init();
-        return 0;
+        while (1) {
+            Sleep(1);
+            if (GetAsyncKeyState(VK_HOME)) {
+                hook.disableAndExit();
+                CloseHandle(param);
+                FreeLibraryAndExitThread(0, 0);
+                return 1;
+            }
+        }
     }
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), COORD(0, 0));
     printf("[%s] DLL Hack Example build: (" __CONFIGURATION__ ") " __DATE__ " at " __TIME__ "\n", ss.c_str());

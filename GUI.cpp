@@ -23,7 +23,6 @@ void mainMenu() noexcept {
     constexpr const char* leftArrow = "->";
     constexpr const char* rightArrow = "<-";
     static int item = 1;
-    GUI::clearScreen(); // ???
     if(!data.username.empty())
         GUI::printOnScreen(0, 0, std::string("Logged as: \033[32m").append(data.username).append("\033[0m").c_str());
     GUI::printOnScreenCentered(7, "The Game :)");
@@ -79,7 +78,6 @@ void registerWindow() noexcept {
     static std::string password;
     static std::string invite;
     static int item = 0;
-    GUI::clearScreen(); // ???
     GUI::printOnScreenCentered(7, "Register Form:");
 
     if (GetAsyncKeyState('S') & 0x8000)
@@ -176,7 +174,6 @@ void login() noexcept {
     HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
     DWORD mode;
 
-    GUI::clearScreen(); // ???
     GUI::printOnScreenCentered(7, "Login Form:");
 
     if (GetAsyncKeyState('S') & 0x8000)

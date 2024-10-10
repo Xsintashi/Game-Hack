@@ -39,7 +39,10 @@
     <ClInclude Include="hooks\hooks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hooks\Utils.h">
+    <ClInclude Include="hooks\SDK\Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hooks\MemoryH.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -54,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="hooks\hooks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hooks\MemoryH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

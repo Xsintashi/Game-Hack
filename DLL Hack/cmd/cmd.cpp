@@ -3,7 +3,6 @@
 #include "../Memory.h"
 
 #include <Windows.h>
-#include <Windows.h>
 
 void CMD::init() noexcept {
     system("cls");

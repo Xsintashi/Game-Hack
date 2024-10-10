@@ -28,6 +28,8 @@ void keysThread() {
 }
 
 void userMove(Player* player) noexcept {
+	// kod który zmienia mi HP na 1337
+	reutnr;
     while (isRunning) {
         THREAD_SLEEP(32);
         if (!player)
